@@ -3,6 +3,7 @@ package com.bivas.teamvault.controller;
 import com.bivas.teamvault.dto.UserDto;
 import com.bivas.teamvault.entity.User;
 import com.bivas.teamvault.repository.UserRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -40,7 +41,7 @@ public class UserController
     }
 
     @PostMapping
-    public ResponseEntity<?> createUser(@RequestBody UserDto userDto)
+    public ResponseEntity<?> createUser(@RequestBody @Valid UserDto userDto)
     {
         try
         {

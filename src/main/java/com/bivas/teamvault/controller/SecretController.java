@@ -9,10 +9,13 @@ import com.bivas.teamvault.repository.SecretRepository;
 import com.bivas.teamvault.repository.TeamRepository;
 import com.bivas.teamvault.service.SecretService;
 import com.bivas.teamvault.service.TeamService;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,23 +28,30 @@ public class SecretController
     private final SecretService secretService;
 
     @GetMapping
-    public ResponseEntity<List<Secret>> getAllSecrets(@PathVariable Long teamId)
+    public ResponseEntity<List<SecretDto>> getAllSecrets(@PathVariable Long teamId)
     {
-        List<Secret> secrets = secretRepository.findByTeamId(teamId);
+        List<SecretDto> secretDtos = secretService.getAllSecrets(teamId);
 
-        return ResponseEntity.ok(secrets);
+        return ResponseEntity.ok(secretDtos);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Secret> getSecret(@PathVariable Long teamId, @PathVariable Long id)
+    public ResponseEntity<SecretDto> getSecret(@PathVariable Long teamId, @PathVariable Long id)
     {
-        Optional<Secret> secret = secretRepository.findById(id);
+        try
+        {
+            SecretDto secret = secretService.getSecret(id);
 
-        return secret.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+            return ResponseEntity.ok(secret);
+        }
+        catch (EntityNotFoundException entityNotFoundException){
+
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping()
-    public ResponseEntity<?> createSecret(@PathVariable Long teamId, @RequestBody SecretDto secretDto)
+    public ResponseEntity<?> createSecret(@PathVariable Long teamId, @RequestBody @Valid SecretDto secretDto)
     {
         try
         {

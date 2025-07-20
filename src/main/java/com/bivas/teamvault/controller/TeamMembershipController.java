@@ -6,6 +6,8 @@ import com.bivas.teamvault.entity.Team;
 import com.bivas.teamvault.entity.TeamMembership;
 import com.bivas.teamvault.repository.TeamMembershipRepository;
 import com.bivas.teamvault.service.TeamMembershipService;
+import jakarta.validation.Valid;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,7 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/teams/{teamId}/team-membership")
+@RequestMapping("/team-membership")
 @RequiredArgsConstructor
 public class TeamMembershipController {
 
@@ -24,23 +26,30 @@ public class TeamMembershipController {
 
     private final TeamMembershipService teamMembershipService;
 
-
-    @GetMapping
-    public ResponseEntity<List<TeamMembership>> getAllTeams()
+    @GetMapping("teams/{teamId}")
+    public ResponseEntity<List<TeamMembershipDto>> getAllTeamMembers(@PathVariable Long teamId)
     {
-        List<TeamMembership> teamMemberships = teamMembershipRepository.findAll();
+        List<TeamMembershipDto> teamMembershipDto = teamMembershipService.getAllTeamMembers(teamId);
+
+        return ResponseEntity.ok(teamMembershipDto);
+    }
+
+    @GetMapping("users/{userId}")
+    public ResponseEntity<List<TeamMembershipDto>> getAllUsersTeams(@PathVariable Long userId)
+    {
+        List<TeamMembershipDto> teamMemberships = teamMembershipService.getAllUsersTeams(userId);
 
         return ResponseEntity.ok(teamMemberships);
     }
 
     @PostMapping
-    public ResponseEntity<?> AddTeamMember(@PathVariable Long teamId, TeamMembershipDto teamMembershipDto)
+    public ResponseEntity<?> AddTeamMember(@RequestBody TeamMembershipDto teamMembershipDto)
     {
         try
         {
-            teamMembershipService.AddUserToTeam(teamMembershipDto.UserId, teamId, teamMembershipDto.Role);
+           teamMembershipDto = teamMembershipService.AddUserToTeam(teamMembershipDto);
 
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok(teamMembershipDto);
         }
         catch (Exception ex)
         {
@@ -48,14 +57,10 @@ public class TeamMembershipController {
         }
     }
 
-    @DeleteMapping("/{userId}")
+    @DeleteMapping("/teams/{teamId}/users/{userId}")
     public ResponseEntity<?> RemoveTeamMember(@PathVariable Long teamId, @PathVariable long userId)
     {
-       List<TeamMembership> teamMemberships = teamMembershipRepository.findByTeamId(teamId);
-
-        Optional<TeamMembership> teamMembership = teamMemberships.stream().filter(x -> x.getUser().getId().equals(userId)).findFirst();
-
-        teamMembership.ifPresent(teamMembershipRepository::delete);
+        teamMembershipService.RemoveUserFromTeam(teamId, userId);
 
         return ResponseEntity.ok().build();
     }

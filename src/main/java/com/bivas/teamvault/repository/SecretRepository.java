@@ -11,4 +11,6 @@ public interface SecretRepository extends JpaRepository<Secret, Long> {
     List<Secret> findByTeamId(Long teamId);
 
     List<Secret> team(Team team);
+
+    Long id(Long id);
 }

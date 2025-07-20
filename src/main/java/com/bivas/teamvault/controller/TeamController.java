@@ -4,6 +4,8 @@ import com.bivas.teamvault.dto.TeamDto;
 import com.bivas.teamvault.entity.Team;
 import com.bivas.teamvault.repository.TeamRepository;
 import com.bivas.teamvault.service.TeamService;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,30 +22,29 @@ public class TeamController
 
     private final TeamRepository teamRepository;
 
-    @GetMapping
-    public ResponseEntity<List<Team>> getAllTeams()
-    {
-        List<Team> teams = teamRepository.findAll();
-
-        return ResponseEntity.ok(teams);
-    }
-
     @GetMapping("/{id}")
-    public ResponseEntity<Team> getTeam(@PathVariable Long id)
-    {
-        Optional<Team> team = teamRepository.findById(id);
-
-        return team.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    @PostMapping()
-    public ResponseEntity<?> createTeam(@RequestBody TeamDto createTeamDto)
+    public ResponseEntity<TeamDto> getTeam(@PathVariable Long id)
     {
         try
         {
-            Team team = teamService.CreateTeam(createTeamDto.Name, createTeamDto.UserId);
+            TeamDto teamDto = teamService.GetTeam(id);
 
-            return ResponseEntity.ok(team);
+            return ResponseEntity.ok().body(teamDto);
+        }
+        catch (EntityNotFoundException entityNotFound)
+        {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping()
+    public ResponseEntity<?> createTeam(@RequestBody @Valid TeamDto teamDto)
+    {
+        try
+        {
+            TeamDto createTeamDto = teamService.CreateTeam(teamDto.Name, teamDto.UserId);
+
+            return ResponseEntity.ok(createTeamDto);
         }
         catch (Exception ex)
         {
