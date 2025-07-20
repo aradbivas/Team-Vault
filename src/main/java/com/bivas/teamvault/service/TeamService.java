@@ -10,13 +10,11 @@ import com.bivas.teamvault.repository.TeamRepository;
 import com.bivas.teamvault.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
-import static java.lang.System.in;
 
 @Service
 @RequiredArgsConstructor

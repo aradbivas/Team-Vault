@@ -1,7 +1,6 @@
 package com.bivas.teamvault.controller;
 
 import com.bivas.teamvault.dto.TeamDto;
-import com.bivas.teamvault.entity.Team;
 import com.bivas.teamvault.repository.TeamRepository;
 import com.bivas.teamvault.service.TeamService;
 import jakarta.persistence.EntityNotFoundException;
@@ -10,11 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
 
 @RestController
-@RequestMapping("/teams")
+@RequestMapping("api/v1/team-vault/teams")
 @RequiredArgsConstructor
 public class TeamController
 {

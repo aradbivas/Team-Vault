@@ -2,25 +2,19 @@ package com.bivas.teamvault.controller;
 
 
 import com.bivas.teamvault.dto.SecretDto;
-import com.bivas.teamvault.dto.TeamDto;
 import com.bivas.teamvault.entity.Secret;
-import com.bivas.teamvault.entity.Team;
 import com.bivas.teamvault.repository.SecretRepository;
-import com.bivas.teamvault.repository.TeamRepository;
 import com.bivas.teamvault.service.SecretService;
-import com.bivas.teamvault.service.TeamService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
-@RequestMapping("teams/{teamId}/secrets")
+@RequestMapping("api/v1/team-vault/teams/{teamId}/secrets")
 @RequiredArgsConstructor
 public class SecretController
 {

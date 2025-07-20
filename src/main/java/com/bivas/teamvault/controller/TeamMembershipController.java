@@ -1,24 +1,17 @@
 package com.bivas.teamvault.controller;
 
-import com.bivas.teamvault.dto.TeamDto;
 import com.bivas.teamvault.dto.TeamMembershipDto;
-import com.bivas.teamvault.entity.Team;
-import com.bivas.teamvault.entity.TeamMembership;
 import com.bivas.teamvault.repository.TeamMembershipRepository;
 import com.bivas.teamvault.service.TeamMembershipService;
-import jakarta.validation.Valid;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/team-membership")
+@RequestMapping("api/v1/team-vault/team-membership")
 @RequiredArgsConstructor
 public class TeamMembershipController {
 
