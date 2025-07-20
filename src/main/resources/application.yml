@@ -7,8 +7,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: teamvaultapp@gmail.com
-    password: nfpe ppea wmcx arza
+    username: ${spring.mail.username}
+    password: ${spring.mail.password}
     properties:
       mail:
         smtp:
