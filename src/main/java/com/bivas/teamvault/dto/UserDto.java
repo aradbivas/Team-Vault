@@ -2,11 +2,18 @@ package com.bivas.teamvault.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-public class UserDto
-{
+@AllArgsConstructor
+public class UserDto {
+
+    @Setter
+    @Getter
+    @JsonProperty("id")
+    public Long Id;
+
     @Setter
     @Getter
     @JsonProperty("name")

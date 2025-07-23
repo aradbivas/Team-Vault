@@ -9,8 +9,6 @@ import com.bivas.teamvault.repository.TeamRepository;
 import com.bivas.teamvault.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,14 +17,12 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class TeamMembershipService
-{
+public class TeamMembershipService {
     private final TeamRepository teamRepository;
     private final UserRepository userRepository;
     private final TeamMembershipRepository teamMembershipRepository;
 
-    public List<TeamMembershipDto> getAllUsersTeams(Long userId)
-    {
+    public List<TeamMembershipDto> getAllUsersTeams(Long userId) {
         List<TeamMembershipDto> teamMembershipDtos = new ArrayList<>();
 
         List<TeamMembership> teamMemberships = teamMembershipRepository.findByUserId(userId);
@@ -36,8 +32,7 @@ public class TeamMembershipService
         return teamMembershipDtos;
     }
 
-    public List<TeamMembershipDto> getAllTeamMembers(long TeamId)
-    {
+    public List<TeamMembershipDto> getAllTeamMembers(long TeamId) {
         List<TeamMembershipDto> teamMembershipDtos = new ArrayList<>();
 
         List<TeamMembership> teamMemberships = teamMembershipRepository.findByTeamId(TeamId);
@@ -47,27 +42,23 @@ public class TeamMembershipService
         return teamMembershipDtos;
     }
 
-    public TeamMembershipDto AddUserToTeam(TeamMembershipDto teamMembershipDto)
-    {
-      User user = userRepository.findById(teamMembershipDto.UserId).orElseThrow(()->new EntityNotFoundException("User not found"));
+    public TeamMembershipDto AddUserToTeam(Long teamId, Long userId, TeamMembership.Role role) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
 
-      Team team = teamRepository.findById(teamMembershipDto.TeamId).orElseThrow(()->new EntityNotFoundException("Team not found"));
+        Team team = teamRepository.findById(teamId).orElseThrow(() -> new EntityNotFoundException("Team not found"));
 
-      TeamMembership teamMembership = TeamMembership.builder()
-                                                    .user(user)
-                                                    .team(team)
-                                                    .role(teamMembershipDto.Role)
-                                                    .build();
+        TeamMembership teamMembership = TeamMembership.builder()
+                .user(user)
+                .team(team)
+                .role(role)
+                .build();
 
-      teamMembershipRepository.save(teamMembership);
+        teamMembershipRepository.save(teamMembership);
 
-      teamMembershipDto.setId(teamMembership.getId());
-
-      return teamMembershipDto;
+        return new TeamMembershipDto(teamMembership.getId(), teamId, userId, role);
     }
 
-    public void RemoveUserFromTeam(Long teamId, Long userId)
-    {
+    public void RemoveUserFromTeam(Long teamId, Long userId) {
         List<TeamMembership> teamMemberships = teamMembershipRepository.findByTeamId(teamId);
 
         Optional<TeamMembership> teamMembership = teamMemberships.stream().filter(x -> x.getUser().getId().equals(userId)).findFirst();
@@ -75,18 +66,12 @@ public class TeamMembershipService
         teamMembership.ifPresent(teamMembershipRepository::delete);
     }
 
-    private List<TeamMembershipDto> MapToTeamMembershipDto(List<TeamMembership> teamMemberships)
-    {
+    private List<TeamMembershipDto> MapToTeamMembershipDto(List<TeamMembership> teamMemberships) {
         List<TeamMembershipDto> teamMembershipDtos = new ArrayList<>();
 
         teamMemberships.forEach(teamMembership -> {
 
-            TeamMembershipDto teamMembershipDto = new TeamMembershipDto();
-
-            teamMembership.setId(teamMembership.getId());
-            teamMembershipDto.setTeamId(teamMembership.getTeam().getId());
-            teamMembershipDto.setUserId(teamMembership.getUser().getId());
-            teamMembershipDto.setRole(teamMembership.getRole());
+            TeamMembershipDto teamMembershipDto = new TeamMembershipDto(teamMembership.getId(), teamMembership.getUser().getId(), teamMembership.getTeam().getId(), teamMembership.getRole());
 
             teamMembershipDtos.add(teamMembershipDto);
         });

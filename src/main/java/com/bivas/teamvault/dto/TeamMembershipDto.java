@@ -3,11 +3,13 @@ package com.bivas.teamvault.dto;
 import com.bivas.teamvault.entity.TeamMembership;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@AllArgsConstructor
 public class TeamMembershipDto {
 
     @JsonProperty("id")

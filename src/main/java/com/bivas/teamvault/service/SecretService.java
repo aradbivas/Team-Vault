@@ -17,63 +17,54 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class SecretService
-{
+public class SecretService {
 
     private final TeamRepository teamRepository;
     private final UserRepository userRepository;
     private final SecretRepository secretRepository;
 
-    public Secret CrateSecret(SecretDto secretDto, Long teamId)
-    {
-        User user = userRepository.findById(secretDto.UserId).orElseThrow(()->new EntityNotFoundException("User not found"));
+    public SecretDto CrateSecret(SecretDto secretDto, Long teamId) {
 
-        Team team = teamRepository.findById(teamId).orElseThrow(()->new EntityNotFoundException("Team not found"));
+        User user = userRepository.findById(secretDto.UserId).orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        Team team = teamRepository.findById(teamId).orElseThrow(() -> new EntityNotFoundException("Team not found"));
 
         Secret secret = Secret.builder()
-                              .team(team)
-                              .createdBy(user)
-                              .name(secretDto.getName())
-                              .description(secretDto.getDescription())
-                              .encryptedValue(secretDto.getValue())
-                              .build();
+                .team(team)
+                .createdBy(user)
+                .name(secretDto.getName())
+                .description(secretDto.getDescription())
+                .encryptedValue(secretDto.getValue())
+                .build();
 
         secretRepository.save(secret);
 
-        return secret;
+        secretDto.setId(secret.getId());
+
+        return secretDto;
     }
 
-    public List<SecretDto> getAllSecrets(Long teamId)
-    {
+    public List<SecretDto> getAllSecrets(Long teamId) {
         List<SecretDto> secretDtos = new ArrayList<>();
 
         List<Secret> secrets = secretRepository.findByTeamId(teamId);
 
         secrets.forEach(secret -> {
+            SecretDto secretDto = new SecretDto(secret.getId(), secret.getName(), secret.getDescription(), secret.getCreatedBy().getId(), secret.getEncryptedValue());
 
-            SecretDto secretDto  = new SecretDto();
-            secretDto.setName(secret.getName());
-            secretDto.setDescription(secret.getDescription());
-            secretDto.setValue(secret.getEncryptedValue());
-            secretDtos.add(secretDto);});
+            secretDtos.add(secretDto);
+        });
 
         return secretDtos;
     }
 
-    public SecretDto getSecret(Long id)
-    {
-        Optional<Secret> secret = secretRepository.findById(id);
+    public SecretDto getSecret(Long id) {
+        Optional<Secret> secretOptional = secretRepository.findById(id);
 
-        secret.orElseThrow(()->new EntityNotFoundException("Secret not found"));
+        secretOptional.orElseThrow(() -> new EntityNotFoundException("Secret not found"));
 
-        SecretDto secretDto = new SecretDto();
+        Secret secret = secretOptional.get();
 
-        secretDto.setName(secret.get().getName());
-
-        secretDto.setDescription(secret.get().getDescription());
-
-        secretDto.setValue(secret.get().getEncryptedValue());
-
-        return secretDto;
+        return new SecretDto(secret.getId(), secret.getName(), secret.getDescription(), secret.getCreatedBy().getId(), secret.getEncryptedValue());
     }
 }

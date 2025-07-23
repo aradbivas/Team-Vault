@@ -1,62 +1,111 @@
 package com.bivas.teamvault.controller;
 
+import com.bivas.teamvault.dto.ErrorResponseDto;
+import com.bivas.teamvault.dto.ResponseDto;
 import com.bivas.teamvault.dto.UserDto;
-import com.bivas.teamvault.entity.User;
 import com.bivas.teamvault.repository.UserRepository;
+import com.bivas.teamvault.service.UserService;
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.bivas.teamvault.service.UserService;
-
-import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("api/v1/team-vault/users")
 @RequiredArgsConstructor
-public class UserController
-{
+public class UserController {
+
     private final UserService userService;
 
     private final UserRepository userRepository;
 
-    @GetMapping
-    public ResponseEntity<List<User>> getAllUsers()
-    {
-        List<User> users = userRepository.findAll();
-
-        return ResponseEntity.ok(users);
-    }
-
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUser(@PathVariable Long id)
-    {
-        Optional<User> user = userRepository.findById(id);
+    public ResponseEntity<ResponseDto<UserDto>> getUser(@PathVariable Long id) {
 
-        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        ResponseDto<UserDto> responseDto = new ResponseDto<>();
+        try {
+
+            UserDto userDto = userService.GetUser(id);
+
+            responseDto.setData(userDto);
+
+            return ResponseEntity.ok(responseDto);
+
+        } catch (EntityNotFoundException entityNotFoundException) {
+
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.NOT_FOUND.name(), "User Not found", entityNotFoundException.getMessage());
+
+            responseDto.setErrorResponseDto(errorResponseDto);
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseDto);
+        } catch (Exception exception) {
+
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.INTERNAL_SERVER_ERROR.name(), "General Error", exception.getMessage());
+
+            responseDto.setErrorResponseDto(errorResponseDto);
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDto);
+        }
     }
 
     @PostMapping
-    public ResponseEntity<?> createUser(@RequestBody @Valid UserDto userDto)
-    {
-        try
-        {
-           User user = userService.CreateUser(userDto.Name, userDto.Email);
+    public ResponseEntity<ResponseDto<UserDto>> createUser(@RequestBody @Valid UserDto userDto) {
 
-            return ResponseEntity.ok(user);
-        }
-        catch (Exception ex)
-        {
-            return ResponseEntity.badRequest().body(ex.getMessage());
+        ResponseDto<UserDto> responseDto = new ResponseDto<>();
+
+        try {
+
+            userDto = userService.CreateUser(userDto.Name, userDto.Email);
+
+            responseDto.setData(userDto);
+
+            return ResponseEntity.ok(responseDto);
+
+        } catch (EntityExistsException ex) {
+
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.BAD_REQUEST.name(), "User Already Exists", ex.getMessage());
+
+            responseDto.setErrorResponseDto(errorResponseDto);
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDto);
+        } catch (Exception ex) {
+
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.INTERNAL_SERVER_ERROR.name(), "General Error", ex.getMessage());
+
+            responseDto.setErrorResponseDto(errorResponseDto);
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDto);
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable long id)
-    {
-        userRepository.deleteById(id);
+    public ResponseEntity<ResponseDto<?>> deleteUser(@PathVariable long id) {
 
-        return ResponseEntity.ok().build();
+        ResponseDto<?> responseDto = new ResponseDto<>();
+
+        try {
+
+            userService.DeleteUser(id);
+
+            return ResponseEntity.ok().build();
+
+        } catch (EntityNotFoundException entityNotFoundException) {
+
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.NOT_FOUND.name(), "User Not Found", entityNotFoundException.getMessage());
+
+            responseDto.setErrorResponseDto(errorResponseDto);
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseDto);
+        } catch (Exception ex) {
+
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.INTERNAL_SERVER_ERROR.name(), "General Error", ex.getMessage());
+
+            responseDto.setErrorResponseDto(errorResponseDto);
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDto);
+        }
     }
 }

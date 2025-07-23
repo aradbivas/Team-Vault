@@ -1,20 +1,18 @@
 package com.bivas.teamvault.service;
 
-import com.bivas.teamvault.dto.TeamMembershipDto;
 import com.bivas.teamvault.email.EmailProvider;
 import com.bivas.teamvault.email.EmailProviderFactory;
 import com.bivas.teamvault.entity.Team;
 import com.bivas.teamvault.entity.TeamMembership;
-import com.bivas.teamvault.entity.User;
 import com.bivas.teamvault.exception.KeyNotFoundException;
 import com.bivas.teamvault.repository.TeamRepository;
 import com.bivas.teamvault.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -29,12 +27,12 @@ public class UserInviteService {
 
     private final TeamMembershipService teamMembershipService;
 
-    private  final UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    public void InviteUser(String recipientEmail, Long teamId)
-    {
+    public void InviteUser(String recipientEmail, Long teamId) {
+
         Team team = teamRepository.findById(teamId)
-                                  .orElseThrow(() -> new RuntimeException("Team not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Team not found"));
 
         String inviteToken = UUID.randomUUID().toString();
 
@@ -47,8 +45,7 @@ public class UserInviteService {
         emailProvider.SendInviteEmail(inviteLink, recipientEmail, team.getName());
     }
 
-    public void AcceptUserInvite(String token, Long userId) throws KeyNotFoundException
-    {
+    public void AcceptUserInvite(String token, Long userId) throws KeyNotFoundException {
         String teamIdStr = redisTemplate.opsForValue().get(token);
 
         if (teamIdStr == null) {
@@ -56,15 +53,7 @@ public class UserInviteService {
             throw new KeyNotFoundException("Invalid or expired invite link.");
         }
 
-        TeamMembershipDto teamMembershipDto = new TeamMembershipDto();
-
-        teamMembershipDto.setUserId(userId);
-
-        teamMembershipDto.setRole(TeamMembership.Role.MEMBER);
-
-        teamMembershipDto.setTeamId(Long.parseLong(teamIdStr));
-
-        teamMembershipService.AddUserToTeam(teamMembershipDto);
+        teamMembershipService.AddUserToTeam(Long.parseLong(teamIdStr), userId, TeamMembership.Role.MEMBER);
 
         redisTemplate.delete(token);
     }
