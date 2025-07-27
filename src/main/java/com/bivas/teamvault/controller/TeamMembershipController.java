@@ -45,14 +45,14 @@ public class TeamMembershipController {
         }
     }
 
-    @GetMapping("users/{userId}")
-    public ResponseEntity<ResponseDto<List<TeamMembershipDto>>> getAllUsersTeams(@PathVariable Long userId) {
+    @GetMapping("users/me")
+    public ResponseEntity<ResponseDto<List<TeamMembershipDto>>> getAllUsersTeams() {
 
         ResponseDto<List<TeamMembershipDto>> responseDto = new ResponseDto<>();
 
         try {
 
-            List<TeamMembershipDto> teamMembershipDto = teamMembershipService.getAllUsersTeams(userId);
+            List<TeamMembershipDto> teamMembershipDto = teamMembershipService.getAllUsersTeams();
 
             responseDto.setData(teamMembershipDto);
 
@@ -74,7 +74,7 @@ public class TeamMembershipController {
         ResponseDto<TeamMembershipDto> responseDto = new ResponseDto<>();
 
         try {
-            teamMembershipDto = teamMembershipService.AddUserToTeam(teamMembershipDto.TeamId, teamMembershipDto.UserId, teamMembershipDto.Role);
+            teamMembershipDto = teamMembershipService.AddUserToTeam(teamMembershipDto.team.Id, teamMembershipDto.user.Id, teamMembershipDto.Role);
 
             responseDto.setData(teamMembershipDto);
 
@@ -106,7 +106,7 @@ public class TeamMembershipController {
         try {
             teamMembershipService.RemoveUserFromTeam(teamId, userId);
 
-            return ResponseEntity.ok().build();
+            return ResponseEntity.noContent().build();
 
         } catch (EntityNotFoundException entityNotFoundException) {
 

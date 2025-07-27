@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @RestController
 @RequestMapping("api/v1/team-vault/teams")
@@ -21,6 +23,30 @@ public class TeamController {
     private final TeamService teamService;
 
     private final TeamRepository teamRepository;
+
+
+    @GetMapping()
+    public ResponseEntity<ResponseDto<List<TeamDto>>> getTeams() {
+
+        ResponseDto<List<TeamDto>> responseDto = new ResponseDto<>();
+
+        try {
+
+            List<TeamDto> secretDtos = teamService.getTeams();
+
+            responseDto.setData(secretDtos);
+
+            return ResponseEntity.ok(responseDto);
+
+        } catch (Exception exception) {
+
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.INTERNAL_SERVER_ERROR.name(), "General Error", exception.getMessage());
+
+            responseDto.setErrorResponseDto(errorResponseDto);
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDto);
+        }
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<ResponseDto<TeamDto>> getTeam(@PathVariable Long id) {
@@ -58,7 +84,7 @@ public class TeamController {
 
         try {
 
-            teamDto = teamService.CreateTeam(teamDto.getName(), teamDto.getUserId());
+            teamDto = teamService.CreateTeam(teamDto.getName(), teamDto.getDescription());
 
             responseDto.setData(teamDto);
 
@@ -97,7 +123,7 @@ public class TeamController {
 
             teamService.DeleteTeam(id);
 
-            return ResponseEntity.ok().build();
+            return ResponseEntity.noContent().build();
 
         } catch (EntityNotFoundException entityNotFoundException) {
 

@@ -2,8 +2,8 @@ package com.bivas.teamvault.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.Instant;
-import java.util.UUID;
 
 @Entity
 @Table(name = "teams")
@@ -20,6 +20,9 @@ public class Team {
 
     @Column(nullable = false)
     private String name;
+
+    @Column(nullable = true)
+    private String description;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "owner_id")

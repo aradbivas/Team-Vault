@@ -26,13 +26,17 @@ public class SecretDto {
 
     @Setter
     @Getter
-    @JsonProperty("userId")
-    @NotBlank(message = "user id can not be empty")
-    public Long UserId;
+    @JsonProperty("createdBy")
+    public UserDto CreatedBy;
 
     @Setter
     @Getter
-    @JsonProperty("value")
-    @NotBlank(message = "secret value can not be empty")
-    public String Value;
+    @JsonProperty("createdAt")
+    public String CreatedAt;
+
+    @Setter
+    @Getter
+    @JsonProperty("content")
+    @NotBlank(message = "secret content can not be empty")
+    public String Content;
 }

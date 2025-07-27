@@ -2,10 +2,15 @@ spring:
   jackson:
     default-property-inclusion: non_null
   datasource:
-    url: jdbc:h2:mem:teamvaultdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    url: jdbc:postgresql://localhost:5432/team-vault
+    username: user
+    password: password
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
   mail:
     host: smtp.gmail.com
     port: 587
@@ -17,11 +22,6 @@ spring:
           auth: true
           starttls:
             enable: true
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
 
   security:
     oauth2:

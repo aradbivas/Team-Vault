@@ -1,6 +1,7 @@
 package com.bivas.teamvault.service;
 
 import com.bivas.teamvault.dto.TeamDto;
+import com.bivas.teamvault.dto.UserDto;
 import com.bivas.teamvault.entity.Secret;
 import com.bivas.teamvault.entity.Team;
 import com.bivas.teamvault.entity.TeamMembership;
@@ -12,8 +13,11 @@ import com.bivas.teamvault.repository.UserRepository;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,25 +32,62 @@ public class TeamService {
     private final SecretRepository secretRepository;
 
 
+    public List<TeamDto> getTeams() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String auth0Sub = authentication.getName();
+
+        Optional<User> user = userRepository.findBySub(auth0Sub);
+
+        user.orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        List<TeamMembership> teamMemberships = teamMembershipRepository.findByUserId(user.get().getId());
+
+        List<TeamDto> teamDtos = new ArrayList<>();
+
+        teamMemberships.forEach(teamMembership -> {
+
+            UserDto userDto = new UserDto(user.get().getId(), user.get().getName(), user.get().getEmail());
+
+            TeamDto teamDto = new TeamDto(teamMembership.getTeam().getId(), teamMembership.getTeam().getName(), teamMembership.getTeam().getDescription(), userDto);
+
+            teamDtos.add(teamDto);
+        });
+
+        return teamDtos;
+    }
+
     public TeamDto GetTeam(long id) {
+
         Optional<Team> team = teamRepository.findById(id);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String auth0Sub = authentication.getName();
+
+        Optional<User> user = userRepository.findBySub(auth0Sub);
 
         team.orElseThrow(() -> new EntityNotFoundException("Team not found"));
 
-        TeamDto teamDto = new TeamDto(team.get().getId(), team.get().getName(), team.get().getId());
+        UserDto userDto = new UserDto(user.get().getId(), user.get().getName(), user.get().getEmail());
+
+        TeamDto teamDto = new TeamDto(team.get().getId(), team.get().getName(), team.get().getDescription(), userDto);
 
         return teamDto;
     }
 
-    public TeamDto CreateTeam(String name, Long userId) {
+    public TeamDto CreateTeam(String name, String description) {
 
-        Optional<User> existingUser = userRepository.findById(userId);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (existingUser.isEmpty()) {
-            throw new EntityNotFoundException("User not found");
-        }
+        String auth0Sub = authentication.getName();
 
-        List<Team> existingTeams = teamRepository.findByOwner(existingUser.get());
+        Optional<User> user = userRepository.findBySub(auth0Sub);
+
+        user.orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        List<Team> existingTeams = teamRepository.findByOwner(user.get());
 
         if (!existingTeams.isEmpty() && existingTeams.stream().anyMatch(team -> team.getName().equals(name))) {
 
@@ -54,14 +95,20 @@ public class TeamService {
         }
         Team team = Team.builder()
                 .name(name)
-                .owner(existingUser.get())
+                .description(description)
+                .owner(user.get())
                 .build();
 
         teamRepository.save(team);
 
-        teamMembershipService.AddUserToTeam(team.getId(), userId, TeamMembership.Role.OWNER);
+        teamMembershipService.AddUserToTeam(team.getId(), user.get().getId(), TeamMembership.Role.OWNER);
 
-        TeamDto teamDto = new TeamDto(team.getId(), team.getName(), team.getOwner().getId());
+        UserDto userDto = new UserDto(user.get().getId(), user.get().getName(), user.get().getEmail());
+
+        TeamDto teamDto = new TeamDto(team.getId(),
+                team.getName(),
+                team.getDescription(),
+                userDto);
 
         return teamDto;
     }

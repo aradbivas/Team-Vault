@@ -8,6 +8,8 @@ import com.bivas.teamvault.repository.UserRepository;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,6 +23,23 @@ public class UserService {
     private final TeamMembershipRepository teamMembershipRepository;
 
 
+    public UserDto GetMeUser() {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        
+        String sub = auth.getName();
+
+        Optional<User> optionalUser = userRepository.findBySub(sub);
+
+        if (optionalUser.isEmpty()) {
+            throw new EntityNotFoundException("User with sub " + sub + "does not exists");
+        }
+
+        User user = optionalUser.get();
+
+        return new UserDto(user.getId(), user.getEmail(), user.getName());
+    }
+
     public UserDto GetUser(Long id) {
         Optional<User> optionalUser = userRepository.findById(id);
 
@@ -33,7 +52,8 @@ public class UserService {
         return new UserDto(user.getId(), user.getEmail(), user.getName());
     }
 
-    public UserDto CreateUser(String name, String email) {
+    public UserDto CreateUser(String sub, String name, String email) {
+
         Optional<User> existingUser = userRepository.findByEmail(email);
 
         if (existingUser.isPresent()) {
@@ -41,6 +61,7 @@ public class UserService {
         }
 
         User user = User.builder()
+                .sub(sub)
                 .email(email)
                 .name(name)
                 .build();

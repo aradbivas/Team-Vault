@@ -3,8 +3,8 @@ package com.bivas.teamvault.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.Instant;
-import java.util.UUID;
 
 @Entity
 @Table(name = "users")
@@ -22,6 +22,9 @@ public class User {
     @Id
     @GeneratedValue
     private Long id;
+
+    @Column(nullable = false, unique = true)
+    private String sub;
 
     @Column(nullable = false, unique = true)
     private String email;

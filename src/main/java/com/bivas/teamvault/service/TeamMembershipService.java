@@ -1,6 +1,8 @@
 package com.bivas.teamvault.service;
 
+import com.bivas.teamvault.dto.TeamDto;
 import com.bivas.teamvault.dto.TeamMembershipDto;
+import com.bivas.teamvault.dto.UserDto;
 import com.bivas.teamvault.entity.Team;
 import com.bivas.teamvault.entity.TeamMembership;
 import com.bivas.teamvault.entity.User;
@@ -9,6 +11,8 @@ import com.bivas.teamvault.repository.TeamRepository;
 import com.bivas.teamvault.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,10 +26,19 @@ public class TeamMembershipService {
     private final UserRepository userRepository;
     private final TeamMembershipRepository teamMembershipRepository;
 
-    public List<TeamMembershipDto> getAllUsersTeams(Long userId) {
+    public List<TeamMembershipDto> getAllUsersTeams() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String auth0Sub = authentication.getName();
+
+        Optional<User> user = userRepository.findBySub(auth0Sub);
+
+        user.orElseThrow(() -> new EntityNotFoundException("User not found"));
+
         List<TeamMembershipDto> teamMembershipDtos = new ArrayList<>();
 
-        List<TeamMembership> teamMemberships = teamMembershipRepository.findByUserId(userId);
+        List<TeamMembership> teamMemberships = teamMembershipRepository.findByUserId(user.get().getId());
 
         teamMembershipDtos = MapToTeamMembershipDto(teamMemberships);
 
@@ -55,7 +68,11 @@ public class TeamMembershipService {
 
         teamMembershipRepository.save(teamMembership);
 
-        return new TeamMembershipDto(teamMembership.getId(), teamId, userId, role);
+        UserDto userDto = new UserDto(user.getId(), user.getName(), user.getEmail());
+
+        TeamDto teamDto = new TeamDto(team.getId(), team.getName(), team.getDescription(), userDto);
+
+        return new TeamMembershipDto(teamMembership.getId(), userDto, teamDto, role);
     }
 
     public void RemoveUserFromTeam(Long teamId, Long userId) {
@@ -67,11 +84,16 @@ public class TeamMembershipService {
     }
 
     private List<TeamMembershipDto> MapToTeamMembershipDto(List<TeamMembership> teamMemberships) {
+
         List<TeamMembershipDto> teamMembershipDtos = new ArrayList<>();
 
         teamMemberships.forEach(teamMembership -> {
 
-            TeamMembershipDto teamMembershipDto = new TeamMembershipDto(teamMembership.getId(), teamMembership.getUser().getId(), teamMembership.getTeam().getId(), teamMembership.getRole());
+            UserDto userDto = new UserDto(teamMembership.getUser().getId(), teamMembership.getUser().getName(), teamMembership.getUser().getEmail());
+
+            TeamDto teamDto = new TeamDto(teamMembership.getTeam().getId(), teamMembership.getTeam().getName(), teamMembership.getTeam().getDescription(), userDto);
+
+            TeamMembershipDto teamMembershipDto = new TeamMembershipDto(teamMembership.getId(), userDto, teamDto, teamMembership.getRole());
 
             teamMembershipDtos.add(teamMembershipDto);
         });

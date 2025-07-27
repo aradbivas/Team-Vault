@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,6 +22,35 @@ public class UserController {
     private final UserService userService;
 
     private final UserRepository userRepository;
+
+    @GetMapping("/me")
+    public ResponseEntity<ResponseDto<UserDto>> getMeUser() {
+
+        ResponseDto<UserDto> responseDto = new ResponseDto<>();
+        try {
+
+            UserDto userDto = userService.GetMeUser();
+
+            responseDto.setData(userDto);
+
+            return ResponseEntity.ok(responseDto);
+
+        } catch (EntityNotFoundException entityNotFoundException) {
+
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.NOT_FOUND.name(), "User Not found", entityNotFoundException.getMessage());
+
+            responseDto.setErrorResponseDto(errorResponseDto);
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseDto);
+        } catch (Exception exception) {
+
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(HttpStatus.INTERNAL_SERVER_ERROR.name(), "General Error", exception.getMessage());
+
+            responseDto.setErrorResponseDto(errorResponseDto);
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseDto);
+        }
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<ResponseDto<UserDto>> getUser(@PathVariable Long id) {
@@ -52,13 +82,15 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<ResponseDto<UserDto>> createUser(@RequestBody @Valid UserDto userDto) {
+    public ResponseEntity<ResponseDto<UserDto>> createUser(Authentication authentication, @RequestBody @Valid UserDto userDto) {
 
         ResponseDto<UserDto> responseDto = new ResponseDto<>();
 
         try {
 
-            userDto = userService.CreateUser(userDto.Name, userDto.Email);
+            String authSub = authentication.getName();
+
+            userDto = userService.CreateUser(authSub, userDto.Name, userDto.Email);
 
             responseDto.setData(userDto);
 
@@ -90,7 +122,7 @@ public class UserController {
 
             userService.DeleteUser(id);
 
-            return ResponseEntity.ok().build();
+            return ResponseEntity.noContent().build();
 
         } catch (EntityNotFoundException entityNotFoundException) {
 

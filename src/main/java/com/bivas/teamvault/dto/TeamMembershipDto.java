@@ -15,14 +15,14 @@ public class TeamMembershipDto {
     @JsonProperty("id")
     public Long id;
 
-    @JsonProperty("userId")
+    @JsonProperty("user")
     @NotNull(message = "user id can not be empty")
-    public Long UserId;
+    public UserDto user;
 
 
-    @JsonProperty("teamId")
+    @JsonProperty("team")
     @NotNull(message = "team id can not be empty")
-    public Long TeamId;
+    public TeamDto team;
 
     @JsonProperty("role")
     @NotNull(message = "role can not be empty")

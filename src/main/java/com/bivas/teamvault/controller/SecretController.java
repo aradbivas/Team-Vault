@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -45,6 +46,7 @@ public class SecretController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasPermission(#id, 'read')")
     public ResponseEntity<ResponseDto<SecretDto>> getSecret(@PathVariable Long teamId, @PathVariable Long id) {
 
         ResponseDto<SecretDto> responseDto = new ResponseDto<>();
@@ -111,7 +113,7 @@ public class SecretController {
 
             secretRepository.deleteById(id);
 
-            return ResponseEntity.ok().build();
+            return ResponseEntity.noContent().build();
 
         } catch (Exception exception) {
 
