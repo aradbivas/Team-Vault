@@ -1,6 +1,6 @@
 package com.bivas.teamvault;
 
-import com.bivas.teamvault.email.EmailProperties;
+import com.bivas.teamvault.properties.EmailProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -9,8 +9,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 @SpringBootApplication
 public class TeamVaultApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(TeamVaultApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(TeamVaultApplication.class, args);
+    }
 
 }

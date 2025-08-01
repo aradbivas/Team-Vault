@@ -2,12 +2,13 @@ package com.bivas.teamvault.service;
 
 import com.bivas.teamvault.dto.TeamMembershipDto;
 import com.bivas.teamvault.dto.UserInviteDto;
-import com.bivas.teamvault.email.EmailProvider;
-import com.bivas.teamvault.email.EmailProviderFactory;
 import com.bivas.teamvault.entity.Team;
 import com.bivas.teamvault.entity.TeamMembership;
 import com.bivas.teamvault.entity.User;
 import com.bivas.teamvault.exception.KeyNotFoundException;
+import com.bivas.teamvault.properties.InviteLinkProperties;
+import com.bivas.teamvault.provider.email.EmailProvider;
+import com.bivas.teamvault.provider.email.EmailProviderFactory;
 import com.bivas.teamvault.repository.TeamRepository;
 import com.bivas.teamvault.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -34,6 +35,8 @@ public class UserInviteService {
 
     private final UserRepository userRepository;
 
+    private final InviteLinkProperties inviteLinkProperties;
+
     public UserInviteDto InviteUser(String recipientEmail, Long teamId) {
 
         Team team = teamRepository.findById(teamId)
@@ -41,7 +44,7 @@ public class UserInviteService {
 
         String inviteToken = UUID.randomUUID().toString();
 
-        String inviteLink = "https://localhost:3000/teams/invite/accept?teamId=" + teamId + "&token=" + inviteToken;
+        String inviteLink = inviteLinkProperties.getUrl() + "/teams/invite/accept?teamId=" + teamId + "&token=" + inviteToken;
 
         EmailProvider emailProvider = emailProviderFactory.getProvider();
 

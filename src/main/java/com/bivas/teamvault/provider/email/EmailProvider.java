@@ -1,4 +1,4 @@
-package com.bivas.teamvault.email;
+package com.bivas.teamvault.provider.email;
 
 public interface EmailProvider {
 

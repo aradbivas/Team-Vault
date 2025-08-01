@@ -2,8 +2,8 @@ package com.bivas.teamvault.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.Instant;
-import java.util.UUID;
 
 @Entity
 @Table(name = "secrets")
@@ -33,7 +33,7 @@ public class Secret {
     private String description;
 
     @Column(nullable = false, length = 4096)
-    private String encryptedValue;
+    private String SecretReferenceId;
 
     private Instant createdAt;
 

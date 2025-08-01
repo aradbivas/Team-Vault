@@ -111,7 +111,7 @@ public class SecretController {
 
         try {
 
-            secretRepository.deleteById(id);
+            secretService.DeleteSecret(id);
 
             return ResponseEntity.noContent().build();
 

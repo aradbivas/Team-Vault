@@ -1,4 +1,4 @@
-package com.bivas.teamvault.email;
+package com.bivas.teamvault.properties;
 
 import lombok.Getter;
 import lombok.Setter;

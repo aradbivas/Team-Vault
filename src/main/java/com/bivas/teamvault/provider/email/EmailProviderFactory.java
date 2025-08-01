@@ -1,6 +1,7 @@
-package com.bivas.teamvault.email;
+package com.bivas.teamvault.provider.email;
 
 
+import com.bivas.teamvault.properties.EmailProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
