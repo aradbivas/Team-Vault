@@ -1,9 +1,9 @@
 spring:
-  config:
-    import:
-      classpath:secrets.yml
   jackson:
     default-property-inclusion: non_null
+
+  profiles:
+    active: ${ACTIVE_PROFILE}
 
   jpa:
     hibernate:
@@ -15,6 +15,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
+    username: teamvaultapp@gmail.com
+    password: ${GMAIL_APP_PASSWORD}
     properties:
       mail:
         smtp:
@@ -30,10 +32,15 @@ spring:
 
 logging:
   level:
-    org.hibernate.SQL: DEBUG
+    org.springframework.boot.context.config: DEBUG
 
 email:
   provider: Gmail
 
 secret-service:
   provider: SecretManager
+
+secret-manager:
+  access-key-id: ${SECRET_MANAGER_ACCESS_KEY_ID}
+  secret-access-key: ${SECRET_MANAGER_SECRET_ACCESS_KEY}
+  region: us-east-1

@@ -19,10 +19,12 @@ public class SecretManagerServiceProvider implements SecretServiceProvider {
 
     public SecretManagerServiceProvider(SecretManagerProperties secretManagerProperties) {
 
-        AwsBasicCredentials awsBasicCredentials = AwsBasicCredentials.create(secretManagerProperties.getAccessKeyId(), secretManagerProperties.getSecretAccessKey());
+        AwsBasicCredentials awsBasicCredentials = AwsBasicCredentials.create(secretManagerProperties.accessKeyId,
+                secretManagerProperties.secretAccessKey);
+
         secretsClient = SecretsManagerClient
                 .builder()
-                .region(Region.of(secretManagerProperties.getRegion()))
+                .region(Region.of(secretManagerProperties.region))
                 .credentialsProvider(StaticCredentialsProvider.create(awsBasicCredentials))
                 .build();
     }

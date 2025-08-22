@@ -1,0 +1,7 @@
+spring:
+  datasource:
+    url: jdbc:sqlserver://localhost:1433;databaseName=TeamVaultDB;integratedSecurity=true;encrypt=true;trustServerCertificate=true
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+
+invite-link:
+  url: http://localhost:3000

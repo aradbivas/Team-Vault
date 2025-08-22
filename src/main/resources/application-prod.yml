@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+invite-link:
+  url: ${INVITE_LINK_URL:http://team-vault.com}
